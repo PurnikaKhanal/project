@@ -49,7 +49,7 @@
     }
      if (extract.empty()) 
         {
-        initialpin=="open";
+        initialpin="open";
         }
         else{
            initialpin=extract;
