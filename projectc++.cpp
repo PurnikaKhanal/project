@@ -1,9 +1,10 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <ctime>
 using namespace std;
-class pin
 
+class pin
 {
 private:
     string initialpin;
@@ -19,25 +20,26 @@ public:
     // check initialpin
     void check()
     {
-        while (attempts > 0)
+        while (attempts >= 0)
         {
             string t;
-            cout << "enter 'open' to continue" << endl;
+            cout << "Enter 'open' to continue: ";
             cin >> t;
             if (t == initialpin && attempts != 0)
             {
-                cout << "acess granted" << endl;
+                cout << "Access granted" << endl;
                 break;
             }
             else if (attempts == 0)
             {
-                cout << "too many incorect attempts \n acess denied.......";
-                exit(0);
+                cout << "Too many incorrect attempts \n Access denied.......";
+                exit(-1);
             }
             attempts--;
-            cout << attempts << " atempts are left" << endl;
+            cout << attempts << " Attempts are left" << endl;
         }
     }
+
     // change pin
     void authentication()
     {
@@ -57,14 +59,14 @@ public:
         {
             initialpin = extract;
         }
-        while (attempts > 0)
+        while (attempts >= 0)
         {
             string temp;
-            cout << "enter your 'old' password:" << endl;
+            cout << "Enter your 'old' password: ";
             cin >> temp;
             if (temp == initialpin && attempts != 0)
             {
-                cout << "enter your 'new' password" << endl;
+                cout << "Enter your 'new' password: ";
                 cin >> newpin;
 
                 ofstream file("pin.txt"); // overwrite in file
@@ -85,13 +87,14 @@ public:
 
             else if (attempts == 0)
             {
-                cout << "too many incorect attempts \n acess denied.......";
+                cout << "Too many incorrect attempts \n Access denied.......";
                 exit(0);
             }
             attempts--;
-            cout << attempts << " atempts are left" << endl;
+            cout << attempts << " Attempts are left" << endl;
         }
     }
+
     // check your new password
     void newcheck()
     {
@@ -109,25 +112,26 @@ public:
         {
             cout << "Unknown error occured\n";
         }
-        while (attempts > 0)
+        while (attempts >= 0)
         {
-            cout << "enter your password:" << endl;
+            cout << "Enter your password: ";
             cin >> temp;
             if (checkpin == temp && attempts != 0)
             {
-                cout << "acess granted" << endl;
+                cout << "Access granted" << endl;
                 break;
             }
             else if (attempts == 0)
             {
-                cout << "to many incoorect attempts \n acess denied....";
-                exit(0);
+                cout << "To many incorrect attempts \n Access denied....";
+                exit(-1);
             }
             attempts--;
-            cout << attempts << " atempts are left" << endl;
+            cout << attempts << " Attempts are left" << endl;
         }
     }
 };
+
 class person
 {
 protected:
@@ -138,12 +142,24 @@ protected:
 public:
     void inputpersondata()
     {
-        cout << "enter your name:" << endl;
+        cout << "Enter your name:" << endl;
         cin >> name;
-        cout << "enter your age:" << endl;
+        cout << "Enter your age:" << endl;
         cin >> age;
-        cout << "enter your height in cm:" << endl;
+        cout << "Enter your height in cm:" << endl;
         cin >> height;
+        try
+        {
+            if (age < 0 || height < 0)
+            {
+                throw invalid_argument("");
+            }
+        }
+        catch (const invalid_argument &e)
+        {
+            cout << "Error: Invalid input detected." << endl;
+            return; // Exit the function if invalid input
+        }
         set_in_file(); // save personal data to file
     }
     void set_in_file()
@@ -162,8 +178,10 @@ public:
         }
     }
 };
+
 class HealthData : public person
 {
+
 protected:
     float water_intake;
     float weight;
@@ -221,8 +239,22 @@ public:
         cin >> BP_diastolic;
         cout << "enter your steps:" << endl;
         cin >> steps;
+        try
+        {
+            if (water_intake < 0 || weight < 0 || sleep < 0 || BP_systolic < 0 || BP_diastolic < 0 || steps < 0)
+            {
+                throw invalid_argument(""); // You can leave the message empty or use a generic one
+            }
+        }
+        catch (const invalid_argument &e)
+        {
+            string msg = "Negative values are not allowed.";
+            cout << "Error: " << msg << endl;
+            return; // Exit the function if invalid input
+        }
         calculations();
     }
+
     void calculations()
     {
         BMI = weight / ((height / 100) * (height / 100));
@@ -230,6 +262,7 @@ public:
         calories = BMR * 1.2;
         set_to_file();
     }
+
     void showdata()
     {
         cout << "Name: " << name << endl;
@@ -333,6 +366,7 @@ public:
         {
             cout << "Failed to open water intake history file." << endl;
         }
+
         // Weight history
         ifstream file1("weight.txt");
         if (file1.is_open())
@@ -349,6 +383,7 @@ public:
         {
             cout << "Failed to open weight history file." << endl;
         }
+
         // Sleep history
         ifstream file2("sleep.txt");
         if (file2.is_open())
@@ -365,6 +400,7 @@ public:
         {
             cout << "Failed to open sleep history file." << endl;
         }
+
         // Blood pressure history
         ifstream file3("BP.txt");
         if (file3.is_open())
@@ -381,6 +417,7 @@ public:
         {
             cout << "Failed to open blood pressure history file." << endl;
         }
+
         // BMI history
         ifstream file4("BMI.txt");
         if (file4.is_open())
@@ -397,6 +434,7 @@ public:
         {
             cout << "Failed to open BMI history file." << endl;
         }
+
         // Calories burned history
         ifstream file5("calories.txt");
         if (file5.is_open())
@@ -415,12 +453,144 @@ public:
         }
     }
 };
-int main()
+
+class Goal : public person
+{
+private:
+    float waterGoal;
+    float sleepGoal;
+    float weightGoal;
+
+public:
+    Goal() // default values intiallize gara
+    {
+        waterGoal = 3;
+        sleepGoal = 8;
+        weightGoal = (int)((int)22 / ((int)height * (int)height / 10000));
+    }
+
+    void initializeGoalFile() // goal value lai file ma save garxa
+    {
+        ifstream file("goal.txt");
+        if (!file.is_open())
+        {
+            ofstream newfile("goal.txt");
+            if (newfile.is_open())
+            {
+                newfile << waterGoal << " " << sleepGoal << " " << weightGoal << endl;
+                newfile.close();
+            }
+        }
+        else
+        {
+            file.close();
+        }
+    }
+
+    void loadGoalFromFile() // goal value lai file bata load garxa
+    {
+        ifstream file("goal.txt");
+        if (file.is_open())
+        {
+            file >> waterGoal >> sleepGoal >> weightGoal;
+            file.close();
+        }
+    }
+
+    void showGoal()
+    {
+        cout << "-----Current Goals-----\n";
+        cout << "Water Intake: " << waterGoal << " L\n";
+        cout << "Sleep: " << sleepGoal << " hr\n";
+        cout << "Weight: " << weightGoal << " kg\n";
+    }
+
+    void changeGoal() // goal value lai overwrite (change) garxa
+    {
+        cout << "Enter new water intake goal(litre): " << endl;
+        cin >> waterGoal;
+        cout << "Enter new sleep goal(hour): " << endl;
+        cin >> sleepGoal;
+        cout << "Enter new weight goal(kg): " << endl;
+        cin >> weightGoal;
+
+        ofstream file("goal.txt");
+        if (file.is_open())
+        {
+            file << waterGoal << " " << sleepGoal << " " << weightGoal << endl;
+            file.close();
+            cout << "Goals updated successfully!\n";
+        }
+    }
+};
+
+class Quote
+{
+private:
+    string quoteOfDay;
+
+public:
+    void setQuote()
+    {
+        string quotes[10] =
+            {
+                "Push yourself, because no one else is going to do it for you.",
+                "Success doesn't just find you. You have to go out and get it.",
+                "Great things never come from comfort zones.",
+                "Dream it. Wish it. Do it.",
+                "Don't stop when you're tired. Stop when you're done.",
+                "Work hard in silence, let success make the noise.",
+                "The key to success is to focus on goals, not obstacles.",
+                "Discipline is the bridge between goals and accomplishment.",
+                "Start where you are. Use what you have. Do what you can.",
+                "The harder you work for something, the greater you'll feel when you achieve it."};
+
+        srand(time(0)); // only once per program run
+        int index = rand() % 10;
+        quoteOfDay = quotes[index];
+    }
+
+    void displayQuote()
+    {
+        cout << "\n------ Quote of the Day ------\n";
+        cout << quoteOfDay << "\n\n"; // setqoutq ma vaya ko choosen qoute, yo line le display gardinxa
+    }
+};
+
+void clearAllDataFiles()
+{
+    const char *files[] = // List all files you want to clear
+        {
+            "water.txt",
+            "weight.txt",
+            "sleep.txt",
+            "BP.txt",
+            "BMI.txt",
+            "calories.txt",
+            "person.txt",
+            "pin.txt",
+            "goal.txt"};
+    int n = sizeof(files) / sizeof(files[0]);
+
+    for (int i = 0; i < n; i++)
+    {
+        ofstream file(files[i], ios::trunc); // open file in truncate mode to clear it
+        if (file.is_open())
+        {
+            file.close(); // just open & close to clear contents
+        }
+        else
+        {
+            cout << "Failed to clear " << files[i] << endl;
+        }
+    }
+    cout << "All data files cleared successfully!\n";
+}
+// password haru check garxa ekai choti
+void finalcheck()
 {
     pin pass;
-    HealthData data_per;
     string extract; // to check if file is empty
-    int choice;
     ifstream file("pin.txt");
     if (file.is_open())
     {
@@ -436,13 +606,31 @@ int main()
     {
         pass.newcheck();
     }
+}
+
+int main()
+{
+    finalcheck();
+    pin p;
+    HealthData data_per;
+    Goal goal;
+    Quote quote;
+    int choice;
+
+    goal.initializeGoalFile(); // goalfile vaya ko value lai call garxa
+    goal.loadGoalFromFile();
+    quote.setQuote();
+
     do
     {
+        quote.displayQuote();
+
         cout << "\t1.Data" << endl;
         cout << "\t2.Display history" << endl;
         cout << "\t3.Personal goals" << endl;
         cout << "\t4.change password" << endl;
-        cout << "\t5.exit" << endl;
+        cout << "\t5.Clear all stored data" << endl; // clear data
+        cout << "\t6.exit" << endl;
         cin >> choice;
         switch (choice)
         {
@@ -454,10 +642,12 @@ int main()
             switch (achoice)
             {
             case 1:
+                cout << "\n";
                 data_per.inputdata();
                 break;
 
             case 2:
+                cout << "\n";
                 data_per.showdata();
                 break;
 
@@ -468,10 +658,12 @@ int main()
             break;
 
         case 2:
+            cout << "\n";
             data_per.history();
             break;
 
         case 3:
+            cout << "\n";
             int gchoice;
             cout << "\t1.Show goal" << endl;
             cout << "\t2.Change goal" << endl;
@@ -479,8 +671,10 @@ int main()
             switch (gchoice)
             {
             case 1:
+                goal.showGoal();
                 break;
             case 2:
+                goal.changeGoal();
                 break;
 
             default:
@@ -490,16 +684,38 @@ int main()
             break;
 
         case 4:
-            pass.authentication();
+            cout << "\n";
+            p.authentication();
             break;
 
         case 5:
+            cout << "\n";
+            cout << "Authorization is required" << endl;
+            finalcheck();
+            cout << "Are you sure you want to clear all stored data? (y/n): ";
+            char confirm;
+            cin >> confirm;
+
+            if (confirm == 'y' || confirm == 'Y')
+            {
+                clearAllDataFiles(); // clear garna function lai call
+            }
+            else
+            {
+                cout << "Clear data cancelled." << endl;
+            }
+            break;
+
+        case 6:
+            cout << "\n";
             cout << "exiting the program.......";
             exit(0);
 
         default:
             cout << "incorrect option" << endl;
+            cout << "\t choose a correct option" << endl;
             break;
         }
-    } while (choice != 5);
+        cout << "\n";
+    } while (choice != 6);
 }
